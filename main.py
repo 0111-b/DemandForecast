@@ -1,4 +1,3 @@
-# Import necessary libraries and make necessary arrangements
 import time
 import numpy as np
 import pandas as pd
@@ -69,7 +68,7 @@ def ewm_features(dataframe, alphas, lags):
                 dataframe.groupby(["store", "item"])['sales'].transform(lambda x: x.shift(lag).ewm(alpha=alpha).mean())
     return dataframe
 
-
+#SWAPE
 def smape(preds, target):
     n = len(preds)
     masked_arr = ~((preds == 0) & (target == 0))
@@ -102,12 +101,6 @@ def plot_lgb_importances(model, plot=False, num=10):
     else:
         print(feat_imp.head(num))
 
-# Kaggle input part
-import os
-for dirname, _, filenames in os.walk('/kaggle/input'):
-    for filename in filenames:
-        print(os.path.join(dirname, filename))
-
 if __name__ == '__main__':
     # 加载数据集
     train = pd.read_csv('./input/demand-forecasting-kernels-only/train.csv', parse_dates=['date']) # 格式转换
@@ -134,81 +127,98 @@ if __name__ == '__main__':
     report = pp.ProfileReport(result)
     report.to_file("submission.html")
 
-    # 特征分析
-    # df["sales"].describe([0.10, 0.30, 0.50, 0.70, 0.80, 0.90, 0.95, 0.99])
-    # df[["store"]].nunique()
-    # df[["item"]].nunique()
-    # df.groupby(["store"])["item"].nunique()
-    # df.groupby(["store", "item"]).agg({"sales": ["sum"]})
-    # df.groupby(["store", "item"]).agg({"sales": ["sum", "mean", "median", "std"]})
-    # df = create_date_features(df)
-    # check_df(df)
-    # df.groupby(["store", "item", "month"]).agg({"sales": ["sum", "mean", "median", "std"]})
-    # df.sort_values(by=['store', 'item', 'date'], axis=0, inplace=True)
-    # df = lag_features(df, [91, 98, 105, 112, 119, 126, 182, 364, 546, 728])
-    # check_df(df)
-    # df = roll_mean_features(df, [365, 546])
-    # df.tail()
-    # alphas = [0.95, 0.9, 0.8, 0.7, 0.5]
-    # lags = [91, 98, 105, 112, 180, 270, 365, 546, 728]
-    #
-    # df = ewm_features(df, alphas, lags)
-    #
-    # check_df(df)
-    # df = pd.get_dummies(df, columns=['store', 'item', 'day_of_week', 'month'])
-    # df['sales'] = np.log1p(df["sales"].values)
-    # train = df.loc[(df["date"] < "2017-01-01"), :]
-    #
-    # # Validation set including first 3 months of 2017 (as we will forecast the first 3 months of 2018)
-    # val = df.loc[(df["date"] >= "2017-01-01") & (df["date"] < "2017-04-01"), :]
-    # cols = [col for col in train.columns if col not in ['date', 'id', "sales", "year"]]
-    # Y_train = train['sales']
-    # X_train = train[cols]
-    #
-    # Y_val = val['sales']
-    # X_val = val[cols]
-    # Y_train.shape, X_train.shape, Y_val.shape, X_val.shape
-    # lgb_params = {'metric': {'mae'},
-    #               'num_leaves': 10,
-    #               'learning_rate': 0.02,
-    #               'feature_fraction': 0.8,
-    #               'max_depth': 5,
-    #               'verbose': 0,
-    #               'num_boost_round': 1000,
-    #               'early_stopping_rounds': 200,
-    #               'nthread': -1}
-    # lgbtrain = lgb.Dataset(data=X_train, label=Y_train, feature_name=cols)
-    # lgbval = lgb.Dataset(data=X_val, label=Y_val, reference=lgbtrain, feature_name=cols)
-    # model = lgb.train(lgb_params, lgbtrain,
-    #                   valid_sets=[lgbtrain, lgbval],
-    #                   num_boost_round=lgb_params['num_boost_round'],
-    #                   early_stopping_rounds=lgb_params['early_stopping_rounds'],
-    #                   feval=lgbm_smape,
-    #                   verbose_eval=100)
-    # y_pred_val = model.predict(X_val, num_iteration=model.best_iteration)
-    # smape(np.expm1(y_pred_val), np.expm1(Y_val))
-    # plot_lgb_importances(model, num=30, plot=True)
-    # train = df.loc[~df.sales.isna()]
-    # Y_train = train['sales']
-    # X_train = train[cols]
-    #
-    # test = df.loc[df.sales.isna()]
-    # X_test = test[cols]
-    # lgb_params = {'metric': {'mae'},
-    #               'num_leaves': 10,
-    #               'learning_rate': 0.02,
-    #               'feature_fraction': 0.8,
-    #               'max_depth': 5,
-    #               'verbose': 0,
-    #               'nthread': -1,
-    #               "num_boost_round": model.best_iteration}
-    # lgbtrain_all = lgb.Dataset(data=X_train, label=Y_train, feature_name=cols)
-    # model = lgb.train(lgb_params, lgbtrain_all, num_boost_round=model.best_iteration)
-    # test_preds = model.predict(X_test, num_iteration=model.best_iteration)
-    #
-    # submission_df = test.loc[:, ['id', 'sales']]
-    # submission_df['sales'] = np.expm1(test_preds)
-    # submission_df['id'] = submission_df.id.astype(int)
-    #
-    # submission_df.to_csv('submission.csv', index=False)
-    # submission_df.head(20)
+    #数据分析
+    df["sales"].describe([0.10, 0.30, 0.50, 0.70, 0.80, 0.90, 0.95, 0.99])
+    df[["store"]].nunique()
+    df[["item"]].nunique()
+    df.groupby(["store"])["item"].nunique()
+    df.groupby(["store", "item"]).agg({"sales": ["sum"]})
+    df.groupby(["store", "item"]).agg({"sales": ["sum", "mean", "median", "std"]})
+
+    # 时序特征
+    df = create_date_features(df)
+    check_df(df)
+    # 查看
+    df.groupby(["store", "item", "month"]).agg({"sales": ["sum", "mean", "median", "std"]})
+    df.sort_values(by=['store', 'item', 'date'], axis=0, inplace=True)
+
+    # Lag/Shifted特征
+    df = lag_features(df, [91, 98, 105, 112, 119, 126, 182, 364, 546, 728])
+    check_df(df)
+
+    # 滚动平均特征
+    df = roll_mean_features(df, [365, 546])
+    df.tail()
+
+    # 指数加权平均特征
+    alphas = [0.95, 0.9, 0.8, 0.7, 0.5]
+    lags = [91, 98, 105, 112, 180, 270, 365, 546, 728]
+    df = ewm_features(df, alphas, lags)
+    check_df(df)
+
+    # One-Hot encoding
+    df = pd.get_dummies(df, columns=['store', 'item', 'day_of_week', 'month'])
+    # 标准化
+    df['sales'] = np.log1p(df["sales"].values)
+
+    # 定义训练集和验证集
+    train = df.loc[(df["date"] < "2017-01-01"), :]
+    val = df.loc[(df["date"] >= "2017-01-01") & (df["date"] < "2017-04-01"), :]
+    cols = [col for col in train.columns if col not in ['date', 'id', "sales", "year"]]
+    Y_train = train['sales']
+    X_train = train[cols]
+
+    Y_val = val['sales']
+    X_val = val[cols]
+
+    # LightGBM Model
+    lgb_params = {'metric': {'mae'},
+                  'num_leaves': 10,
+                  'learning_rate': 0.02,
+                  'feature_fraction': 0.8,
+                  'max_depth': 5,
+                  'verbose': 0,
+                  'num_boost_round': 1000,
+                  'early_stopping_rounds': 200,
+                  'nthread': -1}
+    lgbtrain = lgb.Dataset(data=X_train, label=Y_train, feature_name=cols)
+    lgbval = lgb.Dataset(data=X_val, label=Y_val, reference=lgbtrain, feature_name=cols)
+    model = lgb.train(lgb_params, lgbtrain,
+                      valid_sets=[lgbtrain, lgbval],
+                      num_boost_round=lgb_params['num_boost_round'],
+                      early_stopping_rounds=lgb_params['early_stopping_rounds'],
+                      feval=lgbm_smape,
+                      verbose_eval=100)
+    y_pred_val = model.predict(X_val, num_iteration=model.best_iteration)
+    smape(np.expm1(y_pred_val), np.expm1(Y_val))
+
+    # 特征分析图
+    plot_lgb_importances(model, num=30, plot=True)
+
+    # 最终模型
+    train = df.loc[~df.sales.isna()]
+    Y_train = train['sales']
+    X_train = train[cols]
+
+    test = df.loc[df.sales.isna()]
+    X_test = test[cols]
+    lgb_params = {'metric': {'mae'},
+                  'num_leaves': 10,
+                  'learning_rate': 0.02,
+                  'feature_fraction': 0.8,
+                  'max_depth': 5,
+                  'verbose': 0,
+                  'nthread': -1,
+                  "num_boost_round": model.best_iteration}
+    # LightGBM dataset
+    lgbtrain_all = lgb.Dataset(data=X_train, label=Y_train, feature_name=cols)
+    model = lgb.train(lgb_params, lgbtrain_all, num_boost_round=model.best_iteration)
+    test_preds = model.predict(X_test, num_iteration=model.best_iteration)
+
+    # 提交部分
+    submission_df = test.loc[:, ['id', 'sales']]
+    submission_df['sales'] = np.expm1(test_preds)
+    submission_df['id'] = submission_df.id.astype(int)
+
+    submission_df.to_csv('submission.csv', index=False)
+    submission_df.head(20)
